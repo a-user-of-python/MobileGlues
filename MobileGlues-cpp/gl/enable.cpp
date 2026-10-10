@@ -692,9 +692,9 @@ extern "C"
     // the NATIVE_FUNCTION macro used to generate those aliases for free. Keep
     // them: glXGetProcAddress is a bare dlsym (glx/lookup.cpp), so a vanished
     // symbol becomes a silently null function pointer rather than an error.
-    GLAPI GLAPIENTRY void glEnableiARB(GLenum cap, GLuint index) ;
-    GLAPI GLAPIENTRY void glDisableiARB(GLenum cap, GLuint index) ;
-    GLAPI GLAPIENTRY GLboolean glIsEnablediARB(GLenum cap, GLuint index) ;
+    GLAPI GLAPIENTRY void glEnableiARB(GLenum cap, GLuint index) { glEnablei(cap, index); }
+    GLAPI GLAPIENTRY void glDisableiARB(GLenum cap, GLuint index) { glDisablei(cap, index); }
+    GLAPI GLAPIENTRY GLboolean glIsEnablediARB(GLenum cap, GLuint index) { return glIsEnabledi(cap, index); }
 #else
     GLAPI GLAPIENTRY void glEnableiARB(GLenum cap, GLuint index) { glEnablei(cap, index); }
     GLAPI GLAPIENTRY void glDisableiARB(GLenum cap, GLuint index) { glDisablei(cap, index); }

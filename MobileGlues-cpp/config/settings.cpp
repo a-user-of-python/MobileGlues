@@ -208,7 +208,7 @@ void init_settings() {
         // COMPLETE, allowing Iris to proceed past framebuffer checks on iOS
         // where float render targets are not natively supported.
         global_settings.ignore_error = IgnoreErrorLevel::Full;
-        LOG_D("Error ignoring: Disabled");
+        LOG_D("Error ignoring: Level 2 (Full)");
         break;
     }
 

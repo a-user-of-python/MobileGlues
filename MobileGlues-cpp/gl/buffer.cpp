@@ -1077,13 +1077,13 @@ void* glMapBuffer(GLenum target, GLenum access) {
 #if !defined(__APPLE__)
 extern "C"
 {
-    GLAPI GLAPIENTRY void* glMapBufferARB(GLenum target, GLenum access) ;
+    GLAPI GLAPIENTRY void* glMapBufferARB(GLenum target, GLenum access) { return glMapBuffer(target, access); }
     GLAPI GLAPIENTRY void glBufferDataARB(GLenum target, GLsizeiptr size, const void* data, GLenum usage)
         ;
-    GLAPI GLAPIENTRY GLboolean glUnmapBufferARB(GLenum target) ;
+    GLAPI GLAPIENTRY GLboolean glUnmapBufferARB(GLenum target) { return glUnmapBuffer(target); }
     GLAPI GLAPIENTRY void glBufferStorageARB(GLenum target, GLsizeiptr size, const void* data, GLbitfield flags)
         ;
-    GLAPI GLAPIENTRY void glBindBufferARB(GLenum target, GLuint buffer) ;
+    GLAPI GLAPIENTRY void glBindBufferARB(GLenum target, GLuint buffer) { glBindBuffer(target, buffer); }
 }
 #endif
 

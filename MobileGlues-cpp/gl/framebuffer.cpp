@@ -347,11 +347,11 @@ void restore_home_attachments(framebuffer_t& fbo) {
 // library exports. An application that resolves glDeleteFramebuffersARB, as
 // anything written against EXT_framebuffer_object does, got a null pointer.
 extern "C" {
-GLAPI GLAPIENTRY void glDeleteFramebuffersARB(GLsizei n, const GLuint* names) ;
+GLAPI GLAPIENTRY void glDeleteFramebuffersARB(GLsizei n, const GLuint* names) { glDeleteFramebuffers(n, names); }
 GLAPI GLAPIENTRY void glFramebufferRenderbufferARB(GLenum target, GLenum attachment, GLenum renderbuffertarget,
-                                                   GLuint renderbuffer) ;
+                                                   GLuint renderbuffer) { glFramebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer); }
 GLAPI GLAPIENTRY void glFramebufferTextureLayerARB(GLenum target, GLenum attachment, GLuint texture, GLint level,
-                                                   GLint layer) ;
+                                                   GLint layer) { glFramebufferTextureLayer(target, attachment, texture, level, layer); }
 }
 
 // Wrapped for the same reason glReadPixels is: the source is the read framebuffer,
