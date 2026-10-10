@@ -612,10 +612,15 @@ void internal_convert(GLenum* internal_format, GLenum* type, GLenum* format, boo
         if (format) *format = GL_RGB;
         break;
     case GL_RGB9_E5:
-        if (type) *type = GL_UNSIGNED_INT_5_9_9_9_REV;
+        // iOS FIX: Shared-exponent float not renderable on iOS; fall back to RGB8
+        if (internal_format) *internal_format = GL_RGB8;
+        if (type) *type = GL_UNSIGNED_BYTE;
+        if (format) *format = GL_RGB;
         break;
     case GL_R11F_G11F_B10F:
-        if (type) *type = GL_UNSIGNED_INT_10F_11F_11F_REV;
+        // iOS FIX: Packed float not renderable on iOS; fall back to RGB8
+        if (internal_format) *internal_format = GL_RGB8;
+        if (type) *type = GL_UNSIGNED_BYTE;
         if (format) *format = GL_RGB;
         break;
     case GL_RGBA32UI:
@@ -774,8 +779,10 @@ void internal_convert(GLenum* internal_format, GLenum* type, GLenum* format, boo
         if (format) *format = GL_RG;
         break;
     case GL_RG32F:
+        // iOS FIX: Float render targets not supported; fall back to RG8
+        if (internal_format) *internal_format = GL_RG8;
+        if (type) *type = GL_UNSIGNED_BYTE;
         if (format) *format = GL_RG;
-        if (type) *type = GL_FLOAT;
         break;
     case GL_RG8UI:
         if (format) *format = GL_RG_INTEGER;
@@ -802,8 +809,10 @@ void internal_convert(GLenum* internal_format, GLenum* type, GLenum* format, boo
         if (type) *type = GL_INT;
         break;
     case GL_R32F:
+        // iOS FIX: Float render targets not supported; fall back to R8
+        if (internal_format) *internal_format = GL_R8;
+        if (type) *type = GL_UNSIGNED_BYTE;
         if (format) *format = GL_RED;
-        if (type) *type = GL_FLOAT;
         break;
     case GL_RGBA8_SNORM:
         if (format) *format = GL_RGBA;
@@ -830,6 +839,41 @@ void internal_convert(GLenum* internal_format, GLenum* type, GLenum* format, boo
         } else if (*internal_format == GL_RGBA16_SNORM) {
             if (type && *type != GL_SHORT) *type = GL_SHORT;
         }
+        break;
+    }
+
+    // iOS FINAL SAFETY NET: Catch any float/half-float internal format that
+    // survived the switch above -- including formats PROMOTED to float inside
+    // the switch (e.g., GL_RGBA16 -> GL_RGBA16F when GL_EXT_texture_norm16 is
+    // missing). The iOS GLES backend cannot render to float targets, so fall
+    // back to 8-bit equivalents. This must run after the switch because
+    // promotions happen inside case labels without re-entering the switch.
+    switch (*internal_format) {
+    case GL_RGBA16F:
+    case GL_RGBA32F:
+        *internal_format = GL_RGBA8;
+        if (type) *type = GL_UNSIGNED_BYTE;
+        if (format) *format = GL_RGBA;
+        break;
+    case GL_RGB16F:
+    case GL_RGB32F:
+        *internal_format = GL_RGB8;
+        if (type) *type = GL_UNSIGNED_BYTE;
+        if (format) *format = GL_RGB;
+        break;
+    case GL_RG16F:
+    case GL_RG32F:
+        *internal_format = GL_RG8;
+        if (type) *type = GL_UNSIGNED_BYTE;
+        if (format) *format = GL_RG;
+        break;
+    case GL_R16F:
+    case GL_R32F:
+        *internal_format = GL_R8;
+        if (type) *type = GL_UNSIGNED_BYTE;
+        if (format) *format = GL_RED;
+        break;
+    default:
         break;
     }
 }
@@ -1374,6 +1418,11 @@ void glRenderbufferStorage(GLenum target, GLenum internalFormat, GLsizei width, 
           "height: %d",
           glEnumToString(target), glEnumToString(internalFormat), width, height)
 
+    // iOS FIX: route renderbuffer formats through the same conversion as
+    // textures, so float renderbuffer formats fall back to renderable 8-bit
+    // equivalents instead of producing an incomplete framebuffer.
+    internal_convert(&internalFormat, nullptr, nullptr, /*has_data=*/false);
+
     GLES.glRenderbufferStorage(target, internalFormat, width, height);
 
     CHECK_GL_ERROR_NO_INIT
@@ -1388,6 +1437,9 @@ void glRenderbufferStorageMultisample(GLenum target, GLsizei samples, GLenum int
     LOG_D("glRenderbufferStorageMultisample, target: %d, samples: %d, "
           "internalFormat: %d, width: %d, height: %d",
           target, samples, internalFormat, width, height)
+
+    // iOS FIX: same float-format fallback as glRenderbufferStorage above.
+    internal_convert(&internalFormat, nullptr, nullptr, /*has_data=*/false);
 
     GLES.glRenderbufferStorageMultisample(target, samples, internalFormat, width, height);
 
