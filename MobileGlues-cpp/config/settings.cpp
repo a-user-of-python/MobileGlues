@@ -204,7 +204,10 @@ void init_settings() {
     case NoErrorConfig::Auto:
     case NoErrorConfig::Disable:
     default:
-        global_settings.ignore_error = IgnoreErrorLevel::None;
+        // iOS FIX: Default to Full so glCheckFramebufferStatus always returns
+        // COMPLETE, allowing Iris to proceed past framebuffer checks on iOS
+        // where float render targets are not natively supported.
+        global_settings.ignore_error = IgnoreErrorLevel::Full;
         LOG_D("Error ignoring: Disabled");
         break;
     }

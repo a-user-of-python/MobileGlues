@@ -633,7 +633,13 @@ void internal_convert(GLenum* internal_format, GLenum* type, GLenum* format, boo
         if (format) *format = GL_RGBA;
         break;
     case GL_RGBA16F:
-        if (type) *type = GL_HALF_FLOAT;
+        // iOS FIX: GLES backend cannot render to half-float; fall back to RGBA8
+        // Iris shaders require float render targets, but ANGLE/Metal on iOS
+        // does not support EXT_color_buffer_half_float. Using RGBA8 loses HDR
+        // precision but produces a valid, renderable framebuffer.
+        if (internal_format) *internal_format = GL_RGBA8;
+        if (type) *type = GL_UNSIGNED_BYTE;
+        if (format) *format = GL_RGBA;
         break;
     // The three cases below asked no question and always answered with a float
     // format, so on a device that does have GL_EXT_texture_norm16 a plain 16-bit

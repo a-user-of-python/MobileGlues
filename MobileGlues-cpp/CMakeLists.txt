@@ -149,7 +149,10 @@ if (NOT MSVC)
     # calls bind to changes. On the target, not in the AppleClang-guarded block
     # above -- that block's condition has never been true (dangling NOT MATCHES),
     # which is also why --gc-sections never made it into the link.
-    target_link_options(${CMAKE_PROJECT_NAME} PRIVATE -Wl,-Bsymbolic-functions)
+    # iOS FIX: -Bsymbolic-functions is GNU ld only, not supported by Apple ld
+    if(NOT APPLE)
+        target_link_options(${CMAKE_PROJECT_NAME} PRIVATE -Wl,-Bsymbolic-functions)
+    endif()
 endif()
 
 if(MACOS)

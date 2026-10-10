@@ -2289,22 +2289,22 @@ void glMultiDrawElementsIndirectCount(GLenum mode, GLenum type, const void* indi
 extern "C"
 {
     GLAPI GLAPIENTRY void glMultiDrawArraysEXT(GLenum mode, const GLint* first, const GLsizei* count, GLsizei primcount)
-        __attribute__((alias("glMultiDrawArrays")));
+        ;
     GLAPI GLAPIENTRY void glMultiDrawElementsEXT(GLenum mode, const GLsizei* count, GLenum type,
                                                  const void* const* indices, GLsizei primcount)
-        __attribute__((alias("glMultiDrawElements")));
+        ;
     GLAPI GLAPIENTRY void glMultiDrawArraysIndirectARB(GLenum mode, const void* indirect, GLsizei drawcount,
                                                        GLsizei stride)
-        __attribute__((alias("glMultiDrawArraysIndirect")));
+        ;
     GLAPI GLAPIENTRY void glMultiDrawElementsIndirectARB(GLenum mode, GLenum type, const void* indirect,
                                                          GLsizei drawcount, GLsizei stride)
-        __attribute__((alias("glMultiDrawElementsIndirect")));
+        ;
     GLAPI GLAPIENTRY void glMultiDrawArraysIndirectCountARB(GLenum mode, const void* indirect, GLintptr drawcount,
                                                             GLsizei maxdrawcount, GLsizei stride)
-        __attribute__((alias("glMultiDrawArraysIndirectCount")));
+        ;
     GLAPI GLAPIENTRY void glMultiDrawElementsIndirectCountARB(GLenum mode, GLenum type, const void* indirect,
                                                               GLintptr drawcount, GLsizei maxdrawcount, GLsizei stride)
-        __attribute__((alias("glMultiDrawElementsIndirectCount")));
+        ;
 }
 #else
 // Mach-O does not support alias attributes across translation units the way ELF
