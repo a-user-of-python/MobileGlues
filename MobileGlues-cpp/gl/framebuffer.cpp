@@ -15,6 +15,7 @@
 #include "FSR1/FSR1.h"
 #include <cstdio>
 #include <cstdarg>
+#include <cstdlib>
 #include <string>
 
 // === iOS SHADER DEBUG LOGGING ===
