@@ -600,8 +600,16 @@ void internal_convert(GLenum* internal_format, GLenum* type, GLenum* format, boo
         if (type) *type = GL_UNSIGNED_BYTE;
         break;
     case GL_RGBA32F:
+        // iOS FIX: Float render targets not supported; fall back to RGBA8
+        if (internal_format) *internal_format = GL_RGBA8;
+        if (type) *type = GL_UNSIGNED_BYTE;
+        if (format) *format = GL_RGBA;
+        break;
     case GL_RGB32F:
-        if (type) *type = GL_FLOAT;
+        // iOS FIX: Float render targets not supported; fall back to RGB8
+        if (internal_format) *internal_format = GL_RGB8;
+        if (type) *type = GL_UNSIGNED_BYTE;
+        if (format) *format = GL_RGB;
         break;
     case GL_RGB9_E5:
         if (type) *type = GL_UNSIGNED_INT_5_9_9_9_REV;
@@ -669,7 +677,9 @@ void internal_convert(GLenum* internal_format, GLenum* type, GLenum* format, boo
         break;
     }
     case GL_RGB16F:
-        if (type) *type = GL_HALF_FLOAT;
+        // iOS FIX: Half-float render targets not supported; fall back to RGB8
+        if (internal_format) *internal_format = GL_RGB8;
+        if (type) *type = GL_UNSIGNED_BYTE;
         if (format) *format = GL_RGB;
         break;
     case GL_RG16: {
@@ -692,8 +702,10 @@ void internal_convert(GLenum* internal_format, GLenum* type, GLenum* format, boo
         if (type) *type = GL_BYTE;
         break;
     case GL_R16F:
+        // iOS FIX: Half-float render targets not supported; fall back to R8
+        if (internal_format) *internal_format = GL_R8;
+        if (type) *type = GL_UNSIGNED_BYTE;
         if (format) *format = GL_RED;
-        if (type) *type = GL_HALF_FLOAT;
         break;
     case GL_RED:
         if (type) {
@@ -756,8 +768,10 @@ void internal_convert(GLenum* internal_format, GLenum* type, GLenum* format, boo
         if (type) *type = GL_BYTE;
         break;
     case GL_RG16F:
+        // iOS FIX: Half-float render targets not supported; fall back to RG8
+        if (internal_format) *internal_format = GL_RG8;
+        if (type) *type = GL_UNSIGNED_BYTE;
         if (format) *format = GL_RG;
-        if (type) *type = GL_HALF_FLOAT;
         break;
     case GL_RG32F:
         if (format) *format = GL_RG;
