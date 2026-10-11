@@ -32,6 +32,7 @@
 #include "transfer.h"
 #include "pixel.h"
 #include "mg.h"
+#include "dbglog.h"
 #include <GL/gl.h>
 
 #define DEBUG 0
@@ -961,8 +962,8 @@ void glTexImage2D(GLenum target, GLint level, GLint internalFormat, GLsizei widt
     // An allocation has no bytes to describe, so there both are adopted.
     GLenum want_if = static_cast<GLenum>(internalFormat), want_fmt = format, want_type = type;
     internal_convert(&want_if, &want_type, &want_fmt, mg_upload_has_data(pixels));
+    mg_dbg_texfmt("glTexImage2D", (unsigned)internalFormat, (unsigned)want_if);
     internalFormat = static_cast<GLint>(want_if);
-    mg_dbg_log("[TexImage2D] requested=0x%X converted_if=0x%X (%u) size=%dx%d", internalFormat, want_if, want_if, width, height);
 
     mg_upload_fix_t fix(width, height, 1, format, type, pixels, want_fmt, /*three_d=*/false);
     // A conversion this layer refused -- a source it could not map, or dimensions
@@ -1025,7 +1026,6 @@ void glTexImage3D(GLenum target, GLint level, GLint internalFormat, GLsizei widt
     GLenum want_if = static_cast<GLenum>(internalFormat), want_fmt = format, want_type = type;
     internal_convert(&want_if, &want_type, &want_fmt, mg_upload_has_data(pixels));
     internalFormat = static_cast<GLint>(want_if);
-    mg_dbg_log("[TexImage2D] requested=0x%X converted_if=0x%X (%u) size=%dx%d", internalFormat, want_if, want_if, width, height);
 
     mg_upload_fix_t fix(width, height, depth, format, type, pixels, want_fmt);
     // A conversion this layer refused -- a source it could not map, or dimensions
@@ -1792,29 +1792,6 @@ void glGetTexImage(GLenum target, GLint level, GLenum format, GLenum type, void*
 #if GLOBAL_DEBUG || DEBUG
 #include "../config/config.h"
 #include <fstream>
-#include <cstdio>
-#include <cstdarg>
-#include <string>
-
-// === iOS SHADER DEBUG LOGGING ===
-// Writes to $HOME/Documents/mobileglues_debug.log
-static FILE* mg_dbg_file = nullptr;
-static void mg_dbg_log(const char* fmt, ...) {
-    if (!mg_dbg_file) {
-        const char* home = getenv("HOME");
-        std::string p = home ? (std::string(home) + "/Documents/mobileglues_debug.log") : "/tmp/mg_dbg.log";
-        mg_dbg_file = fopen(p.c_str(), "a");
-        if (mg_dbg_file) {
-            fprintf(mg_dbg_file, "\n--- new session ---\n");
-        }
-    }
-    if (!mg_dbg_file) return;
-    va_list a; va_start(a, fmt);
-    vfprintf(mg_dbg_file, fmt, a);
-    va_end(a);
-    fprintf(mg_dbg_file, "\n");
-    fflush(mg_dbg_file);
-}
 #endif
 
 void glTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width,

@@ -12,31 +12,8 @@
 #include <ska/flat_hash_map.hpp>
 #include "log.h"
 #include "../config/settings.h"
+#include "dbglog.h"
 #include "FSR1/FSR1.h"
-#include <cstdio>
-#include <cstdarg>
-#include <cstdlib>
-#include <string>
-
-// === iOS SHADER DEBUG LOGGING ===
-// Writes to $HOME/Documents/mobileglues_debug.log
-static FILE* mg_dbg_file = nullptr;
-static void mg_dbg_log(const char* fmt, ...) {
-    if (!mg_dbg_file) {
-        const char* home = getenv("HOME");
-        std::string p = home ? (std::string(home) + "/Documents/mobileglues_debug.log") : "/tmp/mg_dbg.log";
-        mg_dbg_file = fopen(p.c_str(), "a");
-        if (mg_dbg_file) {
-            fprintf(mg_dbg_file, "\n--- new session ---\n");
-        }
-    }
-    if (!mg_dbg_file) return;
-    va_list a; va_start(a, fmt);
-    vfprintf(mg_dbg_file, fmt, a);
-    va_end(a);
-    fprintf(mg_dbg_file, "\n");
-    fflush(mg_dbg_file);
-}
 
 #define DEBUG 0
 
@@ -318,11 +295,8 @@ void reattach(GLenum target, GLenum attachment, const attachment_t& a) {
 }
 
 void glFramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level) {
-    mg_dbg_log("[FB-Tex2D] fb_target=0x%X attach=0x%X tex_target=0x%X tex=%u level=%d", target, attachment, textarget, texture, level);
     update_attachment(target, attachment, {attach_kind_t::Texture2D, textarget, texture, level, 0});
     GLES.glFramebufferTexture2D(target, attachment, textarget, texture, level);
-    GLenum e = GLES.glGetError();
-    mg_dbg_log("[FB-Tex2D] GLES error after: 0x%X", e);
 }
 void glFramebufferTexture(GLenum target, GLenum attachment, GLuint texture, GLint level) {
     // Kind rather than a made-up GL_TEXTURE_2D. This entry point attaches the
@@ -581,13 +555,8 @@ void glReadBuffer(GLenum src) {
 }
 GLenum glCheckFramebufferStatus(GLenum target) {
     GLenum status = GLES.glCheckFramebufferStatus(target);
-    mg_dbg_log("[FB-Status] target=0x%X real_status=0x%X (%s)", target, status,
-        status == 0x8CD5 ? "COMPLETE" :
-        status == 0x8CD6 ? "MISSING_ATTACHMENT" :
-        status == 0x8CD7 ? "INCOMPLETE_ATTACHMENT" :
-        status == 0x8CD9 ? "UNSUPPORTED" : "OTHER");
+    mg_dbg_status((unsigned)target, (unsigned)status);
     if (global_settings.ignore_error == IgnoreErrorLevel::Full && status != GL_FRAMEBUFFER_COMPLETE) {
-        mg_dbg_log("[FB-Status] overridden to COMPLETE (ignore_error=Full)");
         return GL_FRAMEBUFFER_COMPLETE;
     }
     return status;
